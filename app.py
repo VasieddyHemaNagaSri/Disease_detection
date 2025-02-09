@@ -44,7 +44,7 @@ app_mode = st.sidebar.selectbox("Select Page", ["HOME", "DISEASE RECOGNITION"])
 
 # Display image
 from PIL import Image
-img = Image.open("Diseases.png")
+img = Image.open("Diseses.png")
 st.image(img)
 
 # Home Page
