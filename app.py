@@ -10,16 +10,23 @@ file_id = "1r6O6VvfVIjzUqJ2QBOVjFv8B-O4DbbVA"
 url = f"https://drive.google.com/uc?id={file_id}"
 model_path = "trained_plant_disease_model.keras"
 
-# Download model if it doesn't exist
+# Step 1: Check if model exists, if not, download
 if not os.path.exists(model_path):
     st.warning("Downloading model from Google Drive... Please wait.")
     gdown.download(url, model_path, quiet=False)
 
-# Load Model
+# Step 2: Confirm file exists before loading
 if os.path.exists(model_path):
-    model = tf.keras.models.load_model(model_path)
+    st.success("✅ Model downloaded successfully! Attempting to load...")
+    try:
+        model = tf.keras.models.load_model(model_path)
+        st.success("🚀 Model Loaded Successfully!")
+    except Exception as e:
+        st.error(f"⚠️ Error loading model: {e}")
+        st.stop()
 else:
-    st.error("Model file not found. Please check the Google Drive link and ensure the file is accessible.")
+    st.error("❌ Model file not found! Check the Google Drive link or upload manually.")
+    st.stop()
 
 # Model Prediction Function
 def model_prediction(test_image):
