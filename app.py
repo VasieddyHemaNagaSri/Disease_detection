@@ -4,30 +4,33 @@ import numpy as np
 import os
 from PIL import Image
 
-# Model path
+# Model file path
 model_path = "trained_plant_disease_model.keras"
 
-# Function to download model if not present
-def download_model():
+# Function to check and download model
+def check_and_download_model():
     url = "https://drive.google.com/uc?export=download&id=1r6O6VvfVIjzUqJ2QBOVjFv8B-O4DbbVA"
+    
     if not os.path.exists(model_path):
         st.warning("Downloading model from Google Drive... Please wait.")
         os.system(f"wget -O {model_path} '{url}'")
+
+        # Verify if the model was downloaded
         if os.path.exists(model_path):
             st.success("✅ Model downloaded successfully!")
         else:
-            st.error("❌ Model download failed. Please upload it manually.")
+            st.error("❌ Model download failed! Please upload it manually.")
+            return False
+    return True
 
-# Check and load model
-if not os.path.exists(model_path):
-    download_model()
-
-try:
-    model = tf.keras.models.load_model(model_path)
-    st.success("🚀 Model Loaded Successfully!")
-except Exception as e:
-    st.error(f"⚠️ Error loading model: {e}")
-    st.stop()
+# Check if the model exists or needs to be downloaded
+if check_and_download_model():
+    try:
+        model = tf.keras.models.load_model(model_path)
+        st.success("🚀 Model Loaded Successfully!")
+    except Exception as e:
+        st.error(f"⚠️ Error loading model: {e}")
+        st.stop()
 
 # Function to make predictions
 def model_prediction(test_image):
