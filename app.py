@@ -5,42 +5,56 @@ import gdown
 import os
 from PIL import Image
 
-# Google Drive File ID & Direct Download URL
+# Corrected Google Drive direct download link
 file_id = "1r6O6VvfVIjzUqJ2QBOVjFv8B-O4DbbVA"
-url = f"https://drive.google.com/uc?id={file_id}"
+url = f"https://drive.google.com/uc?id={file_id}"  
+
+# Path to store model
 model_path = "trained_plant_disease_model.keras"
 
-# Ensure Model is Downloaded
-if not os.path.exists(model_path):
-    st.warning("Downloading model from Google Drive...")
-    gdown.download(url, model_path, quiet=False)
+# Function to Download Model
+def download_model():
+    if not os.path.exists(model_path):
+        st.warning("Downloading model from Google Drive...")
+        gdown.download(url, model_path, quiet=False)
+        if os.path.exists(model_path):
+            st.success("Model downloaded successfully!")
+        else:
+            st.error("Model download failed. Check the file ID and permissions.")
+
+# Call function to ensure model is downloaded
+download_model()
 
 # Function to Load Model
 @st.cache_resource
 def load_model():
-    try:
-        model = tf.keras.models.load_model(model_path)
-        st.success("Model loaded successfully!")
-        return model
-    except Exception as e:
-        st.error(f"Error loading model: {e}")
+    if os.path.exists(model_path):
+        try:
+            model = tf.keras.models.load_model(model_path)
+            st.success("Model loaded successfully!")
+            return model
+        except Exception as e:
+            st.error(f"Error loading model: {e}")
+            return None
+    else:
+        st.error("Model file not found. Ensure it's correctly downloaded.")
         return None
+
+# Load Model
+model = load_model()
 
 # Function for Model Prediction
 def model_prediction(model, test_image):
     try:
         image = Image.open(test_image).convert("RGB")
         image = image.resize((128, 128))
-        input_arr = np.array(image) / 255.0  # Normalize the image
+        input_arr = np.array(image) / 255.0  # Normalize image
         input_arr = np.expand_dims(input_arr, axis=0)
         predictions = model.predict(input_arr)
         return np.argmax(predictions)
     except Exception as e:
         st.error(f"Prediction error: {e}")
         return None
-
-# Load Model Once
-model = load_model()
 
 # Sidebar Navigation
 st.sidebar.title("Plant Disease Detection System")
